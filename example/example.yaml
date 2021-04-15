@@ -33,7 +33,7 @@ logging:
 data:
     load:
         decimation: 2
-        file_data: ./CI.LRL..HHZ
+        file_data: ./scatnet_new_version/02_Ridgecrest_new_scatnet/ #./CI.LRL..HHZ
         trim: [2019-07-04 00:00, 2019-07-04 17:00]
     filter:
         type: highpass

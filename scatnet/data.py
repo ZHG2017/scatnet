@@ -14,7 +14,8 @@ from matplotlib import pyplot as plt
 from matplotlib import dates as md
 from obspy.core.trace import Trace
 from scipy.signal import hanning
-from sklearn.feature_extraction.image import extract_patches as buff
+# from sklearn.feature_extraction.image import extract_patches as buff
+from sklearn.feature_extraction.image import extract_patches_2d as buff
 from statsmodels import robust
 
 warnings.filterwarnings("ignore", category=FutureWarning)

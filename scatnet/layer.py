@@ -6,10 +6,22 @@ import logging
 import numpy as np
 import tensorflow as tf
 
+from functools import wraps
+import numexpr as ne
+def timefn(fn):
+    @wraps(fn)
+    def measure_time(*args, **kwargs):
+        t1 = time.time()
+        result = fn(*args, **kwargs)
+        t2 = time.time()
+        print(f"@timefn: {fn.__name__} took {t2 - t1} seconds")
+        return result
+    return measure_time
+
 HERMITE = [[1, 0, -3, 2], [0, 0, 3, -2], [0, 1, -2, 1], [0, 0, -1, 1]]
 FORMAT = 'float32'
 
-
+@timefn
 def adam(loss, learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8):
     """Adam stochastic gradeint."""
     params = tf.trainable_variables()
@@ -30,9 +42,15 @@ def adam(loss, learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8):
         v_prev = tf.Variable(np.zeros(param.get_shape().as_list(
         ), dtype='float32'), name='m_prev', trainable=False)
 
-        m_t = beta1 * m_prev + (one - beta1) * g_t
-        v_t = beta2 * v_prev + (one - beta2) * tf.square(g_t)
-        step = a_t * m_t / (tf.sqrt(v_t) + epsilon)
+        # m_t = beta1 * m_prev + (one - beta1) * g_t
+        # v_t = beta2 * v_prev + (one - beta2) * tf.square(g_t)
+        # step = a_t * m_t / (tf.sqrt(v_t) + epsilon)
+        m_t = ne.evaluate('xbeta1 * m_prev + (one - beta1) * g_t',)
+        tmp = tf.square(g_t)
+        v_t = ne.evaluate('beta2 * v_prev + (one - beta2) * tmp',)
+        tmp = tf.sqrt(v_t)
+        step = ne.evaluate('a_t * m_t / (tmp + epsilon)',)
+
         updates.append(tf.assign(m_prev, m_t))
         updates.append(tf.assign(v_prev, v_t))
         updates.append(tf.assign_sub(param, step))

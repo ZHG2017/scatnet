@@ -7,6 +7,12 @@ the clustering loss from GMM.
 Authors: Randall Balestriero, Leonard Seydoux.
 Email: leonard.seydoux@gmail.com
 """
+import sys, os
+import pathlib
+# append path of the script's parent folder to system while launching the script
+parent = os.path.dirname(pathlib.Path(__file__).parent.absolute())
+sys.path.append(str(parent))
+
 import numpy as np
 import scatnet as sn
 import scipy as sp

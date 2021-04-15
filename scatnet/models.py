@@ -31,9 +31,13 @@ def gmm(mu, cov, tau, sx_proj, n_clusters=None, gmm_type='natural',
 
     # Choose you loss
     if gmm_type == 'natural':
+        # reduce_logsumexp() Computes log(sum(exp(elements across dimensions of a tensor))).
+        # C.f. https://www.tensorflow.org/api_docs/python/tf/math/reduce_logsumexp
         q = tf.reduce_logsumexp(cat, axis=1)
         loss = - tf.reduce_mean(q)
     else:
+        # argmax() Returns the index with the largest value across axes of a tensor.
+        # C.f. https://www.tensorflow.org/api_docs/python/tf/math/argmax
         y = tf.argmax(cat, axis=1)
         y_un, _ = tf.unique(y)
         q = tf.reduce_sum(tf.stop_gradient(tf.nn.softmax(cat)) * cat, 1)
