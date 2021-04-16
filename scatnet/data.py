@@ -20,7 +20,18 @@ from statsmodels import robust
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+import sys,pathlib
+# temporarly change runtime path of python
+def changepath(func):
+    def inner(*args, **kwargs):
+        # Check if target path exists
+        if os.path.exists(pathlib.Path(sys.argv[0]).parent.absolute()) :
+            # Change the current working Directory    
+            os.chdir(pathlib.Path(sys.argv[0]).parent.absolute())
+        return func(*args, **kwargs)
+    return inner
 
+@changepath
 def read_data(file_data='', patch_shape=2048, decimation=0, channels=None,
               trim=None, extraction_step=None, batch_size=None,
               date_fmt='%y-%m-%d %H:%M', **kwargs):
@@ -49,7 +60,7 @@ def read_data(file_data='', patch_shape=2048, decimation=0, channels=None,
         reader = read
 
     # Get list of files
-    files = sorted(glob.glob(file_data))
+    files = [file_data] # files = sorted(glob.glob(file_data))
 
     # Read
     stream = reader(files[0], **kwargs)
@@ -146,6 +157,7 @@ class Stream(obspy.core.stream.Stream):
         """List all the station names extracted from each trace."""
         return [s.stats.station for s in self]
 
+    @changepath
     def read(self, data_path):
         """Read the data files specified in the datapath with obspy.
 
@@ -175,6 +187,7 @@ class Stream(obspy.core.stream.Stream):
             for index, path in enumerate(data_path):
                 self += obspy.read(path)
 
+    @changepath
     def h5read(self, path_h5, net='PZ', force_start=None, stations=None,
                channel='Z', trim=None):
         """Read seismograms in h5 format.
@@ -265,6 +278,7 @@ class Stream(obspy.core.stream.Stream):
             except KeyError:
                 continue
 
+    @changepath
     def matread(self, data_path, data_name='data', starttime=0,
                 sampling_rate=25.0, decimate=1):
         """

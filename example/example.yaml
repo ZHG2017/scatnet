@@ -33,8 +33,8 @@ logging:
 data:
     load:
         decimation: 2
-        file_data: ./scatnet_new_version/02_Ridgecrest_new_scatnet/ #./CI.LRL..HHZ
-        trim: [2019-07-04 00:00, 2019-07-04 17:00]
+        file_data: ../data/D177.PB.B921..EHZ #./CI.LRL..HHZ
+        trim: [2019-06-26 00:00, 2019-06-26 23:59] # [2019-07-04 00:00, 2019-07-04 17:00]
     filter:
         type: highpass
         freq: 0.1
