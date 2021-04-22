@@ -10,15 +10,15 @@ Email: leonard.seydoux@gmail.com
 import sys, os
 import pathlib
 # append path of the script's parent folder to system while launching the script
-parent = os.path.dirname(pathlib.Path(sys.argv[0]).parent.absolute())
-sys.path.append(str(parent))
+sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 
 import numpy as np
 import scatnet as sn
 import scipy as sp
-import sys
-import tensorflow as tf
+# import sys
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
@@ -52,6 +52,9 @@ depth = len(args['layers']['j'])
 # Some configuration for the graph compilation.
 g = tf.Graph()
 config = tf.ConfigProto()
+# Disable the GPU memory pre-allocattion to avoid VRAM usage exception 
+# while running the code and displaying on the same GPU. 
+config.gpu_options.allow_growth = True
 
 with tf.Session(graph=g, config=config) as sess:
 
@@ -69,10 +72,8 @@ with tf.Session(graph=g, config=config) as sess:
         for i in range(1, depth):
             layer = sn.Scattering(layers[-1].u, index=i, **args['layers'])
             layers.append(layer)
-
         # Extract parameters.
         net = [layer.parameters for layer in layers]
-
         # Get reconstruction losses.
         rl = tf.add_n([a.reconstruction_loss for a in layers])
 

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Reading utilities for learnable scattering transform."""
 
+import pathlib
+
 import h5py
 import logging
 import numpy as np
@@ -225,6 +227,7 @@ class Summary():
         self.epochs = 1 if epochs is None else epochs
         pass
 
+    # @changefilepath
     def save_graph(self, layers, sampling_rate=1, file_name='arch.yaml'):
         """Write time and frequency properties of the graph.
 
@@ -236,6 +239,8 @@ class Summary():
             Name of the YAML file where to store the graph properties.
         """
         file_name = os.path.join(self.path, file_name)
+        # change current path to upper folder twice for the corret relative path to file_name
+        os.chdir(str(pathlib.Path(__file__).parent.parent.absolute()))
 
         # Headers
         header = '# Time and frequency properties of the graph.\n'

@@ -4,12 +4,20 @@
 
 This version does not learn k-means first, but takes external centroids.
 """
+# import sys, os
+# import pathlib
+# # append path of the script's parent folder to system while launching the script
+# parent = os.path.dirname(pathlib.Path(sys.argv[0]).parent.absolute())
+# sys.path.append(str(parent))
 
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
-from tensorflow.contrib.distributions import MultivariateNormalFullCovariance
-MVNFC = MultivariateNormalFullCovariance
+# from tensorflow.contrib.distributions import MultivariateNormalFullCovariance
+# MVNFC = MultivariateNormalFullCovariance
+import tensorflow_probability as tfp
+MVNFC = tfp.distributions.MultivariateNormalFullCovariance
 
 
 def gmm(mu, cov, tau, sx_proj, n_clusters=None, gmm_type='natural',

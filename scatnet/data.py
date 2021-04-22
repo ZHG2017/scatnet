@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Read seismic data."""
+import sys, os
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
 import glob
 import h5py
@@ -15,12 +18,71 @@ from matplotlib import dates as md
 from obspy.core.trace import Trace
 from scipy.signal import hanning
 # from sklearn.feature_extraction.image import extract_patches as buff
-from sklearn.feature_extraction.image import extract_patches_2d as buff
+from numpy.lib.stride_tricks import as_strided
+import numbers
+def buff(arr, patch_shape=8, extraction_step=1):
+    """Extracts patches of any n-dimensional array in place using strides.
+ 
+    Given an n-dimensional array it will return a 2n-dimensional array with
+    the first n dimensions indexing patch position and the last n indexing
+    the patch content. This operation is immediate (O(1)). A reshape
+    performed on the first n dimensions will cause numpy to copy data, leading
+    to a list of extracted patches.
+ 
+    Read more in the :ref:`User Guide <image_feature_extraction>`.
+ 
+    Parameters
+    ----------
+    arr : ndarray
+        n-dimensional array of which patches are to be extracted
+ 
+    patch_shape : integer or tuple of length arr.ndim
+        Indicates the shape of the patches to be extracted. If an
+        integer is given, the shape will be a hypercube of
+        sidelength given by its value.
+ 
+    extraction_step : integer or tuple of length arr.ndim
+        Indicates step size at which extraction shall be performed.
+        If integer is given, then the step is uniform in all dimensions.
+ 
+ 
+    Returns
+    -------
+    patches : strided ndarray
+        2n-dimensional array indexing patches on first n dimensions and
+        containing patches on the last n dimensions. These dimensions
+        are fake, but this way no data is copied. A simple reshape invokes
+        a copying operation to obtain a list of patches:
+        result.reshape([-1] + list(patch_shape))
+    """
+ 
+    arr_ndim = arr.ndim
+ 
+    if isinstance(patch_shape, numbers.Number):
+        patch_shape = tuple([patch_shape] * arr_ndim)
+    if isinstance(extraction_step, numbers.Number):
+        extraction_step = tuple([extraction_step] * arr_ndim)
+ 
+    patch_strides = arr.strides
+ 
+    slices = [slice(None, None, st) for st in extraction_step]
+    indexing_strides = arr[slices].strides
+ 
+    patch_indices_shape = ((np.array(arr.shape) - np.array(patch_shape)) //
+                           np.array(extraction_step)) + 1
+ 
+    shape = tuple(list(patch_indices_shape) + list(patch_shape))
+    strides = tuple(list(indexing_strides) + list(patch_strides))
+ 
+    patches = as_strided(arr, shape=shape, strides=strides)
+    return patches
+ 
+# from sklearn.feature_extraction.image import extract_patches_2d as buff
 from statsmodels import robust
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-import sys,pathlib
+
 # temporarly change runtime path of python
 def changepath(func):
     def inner(*args, **kwargs):
@@ -30,6 +92,7 @@ def changepath(func):
             os.chdir(pathlib.Path(sys.argv[0]).parent.absolute())
         return func(*args, **kwargs)
     return inner
+
 
 @changepath
 def read_data(file_data='', patch_shape=2048, decimation=0, channels=None,
